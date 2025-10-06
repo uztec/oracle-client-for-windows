@@ -1,0 +1,51 @@
+# Sample TNSNAMES.ORA file for testing
+# This file contains example Oracle database connection entries
+
+# Example connection using SERVICE_NAME
+ORCL =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = localhost)(PORT = 1521))
+    (CONNECT_DATA =
+      (SERVER = DEDICATED)
+      (SERVICE_NAME = orcl)
+    )
+  )
+
+# Example connection using SID
+ORCL_SID =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = localhost)(PORT = 1521))
+    (CONNECT_DATA =
+      (SERVER = DEDICATED)
+      (SID = orcl)
+    )
+  )
+
+# Example connection to remote server
+REMOTE_DB =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.1.100)(PORT = 1521))
+    (CONNECT_DATA =
+      (SERVER = DEDICATED)
+      (SERVICE_NAME = prod_db)
+    )
+  )
+
+# Example connection with multiple addresses (failover)
+PROD_CLUSTER =
+  (DESCRIPTION_LIST =
+    (DESCRIPTION =
+      (ADDRESS = (PROTOCOL = TCP)(HOST = prod1.company.com)(PORT = 1521))
+      (CONNECT_DATA =
+        (SERVER = DEDICATED)
+        (SERVICE_NAME = prod)
+      )
+    )
+    (DESCRIPTION =
+      (ADDRESS = (PROTOCOL = TCP)(HOST = prod2.company.com)(PORT = 1521))
+      (CONNECT_DATA =
+        (SERVER = DEDICATED)
+        (SERVICE_NAME = prod)
+      )
+    )
+  )
