@@ -1,5 +1,7 @@
 using OracleClient.Models;
 using System.Data;
+using System.Windows.Forms;
+using System.Drawing;
 
 namespace OracleClient
 {
@@ -259,16 +261,30 @@ namespace OracleClient
 
             var browseButton = new Button
             {
-                Text = "Browse",
+                Text = "Browse TNS",
                 Location = new Point(330, 180),
-                Size = new Size(60, 30),
+                Size = new Size(80, 30),
                 BackColor = Color.FromArgb(108, 117, 125),
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat
             };
             browseButton.FlatAppearance.BorderSize = 0;
-            browseButton.Click += BrowseButton_Click;
+            browseButton.Click += BrowseTnsButton_Click;
             connectionGroup.Controls.Add(browseButton);
+
+            // Connection Wizard Button
+            var wizardButton = new Button
+            {
+                Text = "Connection Wizard",
+                Location = new Point(420, 180),
+                Size = new Size(120, 30),
+                BackColor = Color.FromArgb(0, 123, 255),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat
+            };
+            wizardButton.FlatAppearance.BorderSize = 0;
+            wizardButton.Click += ConnectionWizardButton_Click;
+            connectionGroup.Controls.Add(wizardButton);
 
             panel.Controls.Add(connectionGroup);
 
@@ -355,6 +371,19 @@ namespace OracleClient
             clearButton.FlatAppearance.BorderSize = 0;
             clearButton.Click += ClearButton_Click;
             buttonPanel.Controls.Add(clearButton);
+
+            var navigatorButton = new Button
+            {
+                Text = "Database Navigator",
+                Location = new Point(170, 5),
+                Size = new Size(140, 30),
+                BackColor = Color.FromArgb(255, 193, 7),
+                ForeColor = Color.Black,
+                FlatStyle = FlatStyle.Flat
+            };
+            navigatorButton.FlatAppearance.BorderSize = 0;
+            navigatorButton.Click += NavigatorButton_Click;
+            buttonPanel.Controls.Add(navigatorButton);
 
             queryGroup.Controls.Add(buttonPanel);
             panel.Controls.Add(queryGroup);
@@ -548,7 +577,7 @@ namespace OracleClient
             }
         }
 
-        private async void BrowseButton_Click(object? sender, EventArgs e)
+        private async void BrowseTnsButton_Click(object? sender, EventArgs e)
         {
             using var openFileDialog = new OpenFileDialog
             {
@@ -639,6 +668,85 @@ namespace OracleClient
 
             if (queryTextBox != null) queryTextBox.Clear();
             if (resultsDataGrid != null) resultsDataGrid.DataSource = null;
+        }
+
+        private void NavigatorButton_Click(object? sender, EventArgs e)
+        {
+            if (!_dbManager.IsConnected)
+            {
+                MessageBox.Show("Please connect to a database first.", "No Connection", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            using var navigatorForm = new Forms.DatabaseNavigatorForm(_dbManager);
+            navigatorForm.ShowDialog();
+        }
+
+        private void ConnectionWizardButton_Click(object? sender, EventArgs e)
+        {
+            using var wizardForm = new Forms.ConnectionWizardForm();
+            if (wizardForm.ShowDialog() == DialogResult.OK)
+            {
+                // Apply the connection from wizard
+                var connectionTypeCombo = this.Controls.Find("connectionTypeCombo", true).FirstOrDefault() as ComboBox;
+                var userTextBox = this.Controls.Find("userTextBox", true).FirstOrDefault() as TextBox;
+                var passTextBox = this.Controls.Find("passTextBox", true).FirstOrDefault() as TextBox;
+
+                if (connectionTypeCombo != null && userTextBox != null && passTextBox != null)
+                {
+                    // Parse the connection string to populate fields
+                    var connectionString = wizardForm.ConnectionString;
+                    if (!string.IsNullOrEmpty(connectionString))
+                    {
+                        // Extract username and password from connection string
+                        var userMatch = System.Text.RegularExpressions.Regex.Match(connectionString, @"User Id=([^;]+)");
+                        var passMatch = System.Text.RegularExpressions.Regex.Match(connectionString, @"Password=([^;]+)");
+                        
+                        if (userMatch.Success) userTextBox.Text = userMatch.Groups[1].Value;
+                        if (passMatch.Success) passTextBox.Text = passMatch.Success ? passMatch.Groups[1].Value : "";
+
+                        // Check if it's a TNS connection or direct
+                        if (connectionString.Contains("Data Source="))
+                        {
+                            var dataSourceMatch = System.Text.RegularExpressions.Regex.Match(connectionString, @"Data Source=([^;]+)");
+                            if (dataSourceMatch.Success)
+                            {
+                                var dataSource = dataSourceMatch.Groups[1].Value;
+                                if (dataSource.Contains("/"))
+                                {
+                                    // Direct connection
+                                    connectionTypeCombo.SelectedIndex = 1;
+                                    var parts = dataSource.Split('/');
+                                    if (parts.Length == 2)
+                                    {
+                                        var hostPort = parts[0];
+                                        var service = parts[1];
+                                        
+                                        var hostTextBox = this.Controls.Find("hostTextBox", true).FirstOrDefault() as TextBox;
+                                        var serviceTextBox = this.Controls.Find("serviceTextBox", true).FirstOrDefault() as TextBox;
+                                        
+                                        if (hostTextBox != null && serviceTextBox != null)
+                                        {
+                                            if (hostPort.Contains(":"))
+                                            {
+                                                var hostPortParts = hostPort.Split(':');
+                                                hostTextBox.Text = hostPortParts[0];
+                                                var portTextBox = this.Controls.Find("portTextBox", true).FirstOrDefault() as TextBox;
+                                                if (portTextBox != null) portTextBox.Text = hostPortParts[1];
+                                            }
+                                            else
+                                            {
+                                                hostTextBox.Text = hostPort;
+                                            }
+                                            serviceTextBox.Text = service;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         protected override void Dispose(bool disposing)
