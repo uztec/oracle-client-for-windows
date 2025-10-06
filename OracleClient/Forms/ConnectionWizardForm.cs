@@ -9,18 +9,18 @@ namespace OracleClient.Forms
         public string ConnectionString { get; private set; } = string.Empty;
         public string ConnectionName { get; private set; } = string.Empty;
 
-        private ComboBox _driverCombo;
-        private TextBox _serverTextBox;
-        private TextBox _portTextBox;
-        private TextBox _serviceTextBox;
-        private TextBox _sidTextBox;
-        private TextBox _usernameTextBox;
-        private TextBox _passwordTextBox;
-        private CheckBox _useTnsCheckBox;
-        private ComboBox _tnsCombo;
-        private TextBox _tnsPathTextBox;
-        private Button _browseTnsButton;
-        private List<TnsNamesParser.TnsEntry> _tnsEntries;
+        private ComboBox _driverCombo = null!;
+        private TextBox _serverTextBox = null!;
+        private TextBox _portTextBox = null!;
+        private TextBox _serviceTextBox = null!;
+        private TextBox _sidTextBox = null!;
+        private TextBox _usernameTextBox = null!;
+        private TextBox _passwordTextBox = null!;
+        private CheckBox _useTnsCheckBox = null!;
+        private ComboBox _tnsCombo = null!;
+        private TextBox _tnsPathTextBox = null!;
+        private Button _browseTnsButton = null!;
+        private List<TnsNamesParser.TnsEntry> _tnsEntries = null!;
 
         public ConnectionWizardForm()
         {

@@ -17,6 +17,10 @@ namespace OracleClient
             {
                 components.Dispose();
             }
+            if (disposing)
+            {
+                _dbManager?.Dispose();
+            }
             base.Dispose(disposing);
         }
 

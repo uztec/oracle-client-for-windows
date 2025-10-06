@@ -8,14 +8,13 @@ namespace OracleClient.Forms
     public partial class DatabaseNavigatorForm : Form
     {
         private DatabaseManager _dbManager;
-        private TreeView _navigationTree;
-        private DataGridView _dataGrid;
-        private TextBox _searchTextBox;
-        private ComboBox _rowLimitCombo;
-        private Label _statusLabel;
+        private TreeView _navigationTree = null!;
+        private DataGridView _dataGrid = null!;
+        private TextBox _searchTextBox = null!;
+        private ComboBox _rowLimitCombo = null!;
+        private Label _statusLabel = null!;
         private string _currentTable = string.Empty;
         private int _currentPage = 1;
-        private int _pageSize = 100;
 
         public DatabaseNavigatorForm(DatabaseManager dbManager)
         {
@@ -391,7 +390,9 @@ namespace OracleClient.Forms
 
         private void ShowNodeAndChildren(TreeNode node)
         {
-            node.Visible = true;
+            // TreeNode doesn't have Visible property, so we'll use a different approach
+            // For now, we'll just expand all nodes
+            node.Expand();
             foreach (TreeNode child in node.Nodes)
             {
                 ShowNodeAndChildren(child);
@@ -410,13 +411,22 @@ namespace OracleClient.Forms
             }
 
             bool nodeMatches = node.Text.ToLower().Contains(searchText);
-            node.Visible = nodeMatches || hasVisibleChildren;
-            return node.Visible;
+            // Since TreeNode doesn't have Visible property, we'll use a different approach
+            // We'll just expand matching nodes and collapse non-matching ones
+            if (nodeMatches || hasVisibleChildren)
+            {
+                node.Expand();
+            }
+            else
+            {
+                node.Collapse();
+            }
+            return nodeMatches || hasVisibleChildren;
         }
 
-        private async void RefreshButton_Click(object? sender, EventArgs e)
+        private void RefreshButton_Click(object? sender, EventArgs e)
         {
-            await LoadDatabaseObjects();
+            LoadDatabaseObjects();
         }
 
         private void NavigationTree_AfterSelect(object? sender, TreeViewEventArgs e)

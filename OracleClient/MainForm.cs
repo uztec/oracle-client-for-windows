@@ -749,13 +749,5 @@ namespace OracleClient
             }
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                _dbManager?.Dispose();
-            }
-            base.Dispose(disposing);
-        }
     }
 }
